@@ -1,5 +1,5 @@
 numpy
 pandas
 matplotlib
-requests
+beautifulsoup4
 Wikipedia-API
