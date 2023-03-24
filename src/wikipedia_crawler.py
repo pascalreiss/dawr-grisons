@@ -1,4 +1,5 @@
 import os
+import regex as re
 import requests
 import pandas as pd
 import wikipediaapi
@@ -12,30 +13,57 @@ wiki = wikipediaapi.Wikipedia(
 )
 
 def getListOfMuncipalities() -> List[str]:
-    url = 'https://de.wikipedia.org/wiki/Gemeinden_des_Kantons_Graub%C3%BCnden'
-    req = requests.get(url)
-    soup = bs(req.text, "html.parser")
-    muncipalities = []
-    for tr in soup.find_all('td')[1::8]:
-        a = tr.find('a')
-        muncipalities.append(a.text)
+    municpalities_path = Path('./raw_data/muncipalities.csv')
+    municpality_df: pd.DataFrame
+    if (municpalities_path.exists()):
+        municpality_df = pd.read_csv(municpalities_path)
+    else:
+        url = 'https://de.wikipedia.org/wiki/Gemeinden_des_Kantons_Graub%C3%BCnden'
+        req = requests.get(url)
+        soup = bs(req.text, "html.parser")
+        muncipalities = []
+        for tr in soup.find_all('td')[1::8]:
+            a = tr.find('a')
+            muncipalities.append(re.sub(r'\p{C}', '', a.text))
     
-    municpalities_file = Path('./data/muncipalities.csv')
-    if (not municpalities_file.exists()):
-        df = pd.DataFrame(muncipalities, columns=['name'])
-        df.to_csv('./data/muncipalities.csv', index=False)
+        municpality_df = pd.DataFrame(muncipalities, columns=['name'])
+        createFileFromDf(municpalities_path, municpality_df)
     
-    return muncipalities
+    return municpality_df.name.tolist()
 
 
 
 
 def main() -> None:
+    famous_people_path = Path('./raw_data/famous_people.csv')
+    if famous_people_path.exists():
+        return
     muncipalities = getListOfMuncipalities()
-    for municpality in muncipalities:
-        content = wiki.page(municpality)
+    muncipality_of_famous_person = []
+    famous_person = []
+    for muncipality in muncipalities:
+        content = wiki.page(muncipality)
         if (not content.exists):
             continue
         
-        print(content.section_by_title('Persönlichkeiten').text)
+        if content.section_by_title('Persönlichkeiten') is not None:
+            people = content.section_by_title('Persönlichkeiten').full_text().split('\n')
+            for person in people:
+                if person not in ['Persönlichkeiten', '', 'Wissenschaft:', 'Sport:', 'Ehrenbürger'
+                                  , 'Weitere Persönlichkeiten', '(Sortierung nach Geburtsjahr)', 'Kunst/Kultur:'
+                                  , 'Politik und Unternehmertum:', 'Wissenschaft: ', 'Kunst/Kultur/Medien:', 'Sport: '
+                                  , 'Politik und Unternehmertum: ', 'Söhne und Töchter der Stadt', 'Söhne und Töchter Maienfelds']:
+                    famous_person.append(person.strip('"'))
+                    muncipality_of_famous_person.append(muncipality)
+
+    famous_people_df = pd.DataFrame({'Famous_Person': famous_person, 'Muncipality': muncipality_of_famous_person})
+    famous_people_path = Path('./raw_data/famous_people.csv')
+    createFileFromDf(famous_people_path, famous_people_df)
+
+def createFileFromDf(path: Path, df: pd.DataFrame, index=False) -> None:
+    if (not path.exists()):
+        df.to_csv(path, index=index)
+
+
+
 main()
