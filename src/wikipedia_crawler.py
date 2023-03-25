@@ -53,12 +53,20 @@ def main() -> None:
                                   , 'Weitere Persönlichkeiten', '(Sortierung nach Geburtsjahr)', 'Kunst/Kultur:'
                                   , 'Politik und Unternehmertum:', 'Wissenschaft: ', 'Kunst/Kultur/Medien:', 'Sport: '
                                   , 'Politik und Unternehmertum: ', 'Söhne und Töchter der Stadt', 'Söhne und Töchter Maienfelds']:
-                    famous_person.append(person.strip('"'))
+                    person = person.strip('"')
+                    print(person)
+                    famous_person.append(person)
+                    if (muncipality == 'Roveredo'):
+                        muncipality = 'Roveredo (GR)'
                     muncipality_of_famous_person.append(muncipality)
 
-    famous_people_df = pd.DataFrame({'Famous_Person': famous_person, 'Muncipality': muncipality_of_famous_person})
+    famous_people_df = pd.DataFrame({'Famous_Person': famous_person, 'Gemeinde_Name': muncipality_of_famous_person})
     famous_people_path = Path('./raw_data/famous_people.csv')
     createFileFromDf(famous_people_path, famous_people_df)
+    municpalities_path = Path('./raw_data/muncipalities.csv')
+    muncipalities_df = pd.read_csv(municpalities_path)
+    muncipalities_df.loc[muncipalities_df['name'] == 'Roveredo', 'name'] = 'Roveredo (GR)'
+    muncipalities_df.to_csv(municpalities_path, mode='w', index=False)
 
 def createFileFromDf(path: Path, df: pd.DataFrame, index=False) -> None:
     if (not path.exists()):
