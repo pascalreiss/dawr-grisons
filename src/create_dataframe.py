@@ -28,8 +28,8 @@ def main() -> None:
     df['Gemeinde_Name'] = df['Gemeinde_Name'].apply(lambda x: re.sub(r'\p{C}', '', x))
 
     # Here regex matching is used so () are an issue, interestingly it works with the newly added entry, but does not if I add the others it can not find
-    df = df[df['Gemeinde_Name'].astype(str).str.contains('|'.join(relevant_muncipalities))]
-    roverdo = df[df['Gemeinde_Name'] == 'Roveredo (GR)']
+    df = df[df['Gemeinde_Name'].isin(relevant_muncipalities)]
+
 
     erkannte_gemeinden = df['Gemeinde_Name'].tolist()
     rest = set(relevant_muncipalities) - set(erkannte_gemeinden)
