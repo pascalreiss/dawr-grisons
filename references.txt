@@ -1,2 +1,4 @@
 Regionalporträts 2021: Kennzahlen aller Gemeinden, https://www.bfs.admin.ch/bfs/de/home/statistiken/regionalstatistik/regionale-portraets-kennzahlen/gemeinden.assetdetail.15864450.html, [21.02.2023]
 Wikipedia-API deoc, https://pypi.org/project/Wikipedia-API/, [28.02.2023]
+Informationen zur Covid Abstimmung 2019, https://opendata.swiss/de/dataset/anderung-vom-19-marz-2021-des-covid-19-gesetzes/resource/470f2fde-f21c-408b-8bde-957e16c8ad43, [24.03.2023]
+ChatGPT zur Hilfe bei pandas, https://chat.openai.com/chat, [24.03.2023]

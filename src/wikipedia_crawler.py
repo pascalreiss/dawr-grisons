@@ -16,7 +16,7 @@ wiki = wikipediaapi.Wikipedia(
 )
 
 def getListOfMuncipalities() -> List[str]:
-    municpalities_path = getPathDynamically('raw_data', 'muncipalities.csv', check_exists=False)
+    municpalities_path = getPathDynamically('generated_data', 'muncipalities.csv', check_exists=False)
     municpality_df: pd.DataFrame
     if (municpalities_path.exists()):
         municpality_df = pd.read_csv(municpalities_path)
@@ -37,10 +37,7 @@ def getListOfMuncipalities() -> List[str]:
 
 
 
-def main() -> None:
-    famous_people_path = getPathDynamically('raw_data', 'famous_people.csv', check_exists=False)
-    if famous_people_path.exists():
-        return
+def Crawl_Famous_People() -> pd.DataFrame:
     muncipalities = getListOfMuncipalities()
     muncipality_of_famous_person = []
     famous_person = []
@@ -50,6 +47,10 @@ def main() -> None:
             continue
         
         if content.section_by_title('Persönlichkeiten') is not None:
+            # change all instances as the gemeinde_allgemein file uses another name
+            if (muncipality == 'Roveredo'):
+                muncipality = 'Roveredo (GR)'
+
             people = content.section_by_title('Persönlichkeiten').full_text().split('\n')
             for person in people:
                 if person not in ['Persönlichkeiten', '', 'Wissenschaft:', 'Sport:', 'Ehrenbürger'
@@ -57,18 +58,19 @@ def main() -> None:
                                   , 'Politik und Unternehmertum:', 'Wissenschaft: ', 'Kunst/Kultur/Medien:', 'Sport: '
                                   , 'Politik und Unternehmertum: ', 'Söhne und Töchter der Stadt', 'Söhne und Töchter Maienfelds']:
                     famous_person.append(person)
-                    # change all instances as the gemeinde_allgemein file uses another name
-                    if (muncipality == 'Roveredo'):
-                        muncipality = 'Roveredo (GR)'
                     muncipality_of_famous_person.append(muncipality)
 
-    famous_people_df = pd.DataFrame({'Famous_Person': famous_person, 'Gemeinde_Name': muncipality_of_famous_person})
-    create_csv('raw_data', 'famous_people.csv', famous_people_df, index=True)
+    return pd.DataFrame({'Famous_Person': famous_person, 'Gemeinde_Name': muncipality_of_famous_person})
+    
+    
+def get_famous_people_and_save() -> None:
+    famous_people_path = getPathDynamically('generated_data', 'famous_people.csv', check_exists=False)
+    if famous_people_path.exists():
+        return
+    
+    create_csv('generated_data', 'famous_people.csv', Crawl_Famous_People(), index=True)
 
     # after getting all muncipality pages from wikipedia we can now update it to match the name in all ofther files
-    muncipalities_df = read_csv('raw_data', 'muncipalities.csv')
+    muncipalities_df = read_csv('generated_data', 'muncipalities.csv')
     muncipalities_df.loc[muncipalities_df['name'] == 'Roveredo', 'name'] = 'Roveredo (GR)'
-    create_csv('raw_data', 'muncipalities.csv', muncipalities_df, index=False, overwrite=True)
-
-
-main()
+    create_csv('generated_data', 'muncipalities.csv', muncipalities_df, index=False, overwrite=True)

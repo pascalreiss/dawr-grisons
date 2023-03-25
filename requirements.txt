@@ -4,4 +4,3 @@ matplotlib
 beautifulsoup4
 Wikipedia-API
 openpyxl
-regex
