@@ -1,5 +1,0 @@
-from create_dataframe import merge_DataFrames_and_save
-from wikipedia_crawler import get_famous_people_and_save
-
-get_famous_people_and_save()
-merge_DataFrames_and_save()
