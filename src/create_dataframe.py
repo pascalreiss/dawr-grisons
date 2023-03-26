@@ -27,6 +27,10 @@ def merge_DataFrames_and_save() -> None:
 
     abstimmung_df = read_csv('raw_data', 'anderung-vom-19-maerz-2021-des-covid-19-gesetzes.csv')
     abstimmung_df = abstimmung_df.rename(columns={'name':'Gemeinde_Name'})
+    abstimmung_df['total_votes'] = abstimmung_df['yeas'] + abstimmung_df['nays']
+    abstimmung_df['Wahlbeteiligung'] = abstimmung_df['total_votes'] / abstimmung_df['eligible_voters']
+    abstimmung_df['Yes_ratio'] = abstimmung_df['yeas'] / abstimmung_df['total_votes']
+    abstimmung_df['No_ratio'] = abstimmung_df['nays'] / abstimmung_df['total_votes']
    
     famous_people_df = read_csv('generated_data', 'famous_people.csv')
     famous_people_df_grouped = famous_people_df.groupby('Gemeinde_Name')['Famous_Person'].agg([('Famous_Person_list', lambda x: '|'.join(x)), ('Famous_Person_count', 'count')]).reset_index()
